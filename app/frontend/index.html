@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/style.css">
+    <title>Restaurant Orders</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Orders</h1>
+        <form id="orderForm">
+            <label for="dish">Dish:</label>
+            <input type="text" id="dish" name="dish" required>
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" required>
+            <label for="price">Price:</label>
+            <input type="number" id="price" name="price" step="0.01" required>
+            <label for="observations">Observations:</label>
+            <textarea id="observations" name="observations"></textarea>
+            <button type="submit">Submit Order</button>
+        </form>
+        <div id="orderList">
+            <h2>Orders</h2>
+            <ul id="orders"></ul>
+        </div>
+    </div>
+    <script>
+        document.getElementById('orderForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const orderData = {
+                dish: formData.get('dish'),
+                quantity: formData.get('quantity'),
+                price: formData.get('price'),
+                observations: formData.get('observations')
+            };
+
+            const response = await fetch('/api/dishes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (response.ok) {
+                const order = await response.json();
+                addOrderToList(order);
+                this.reset();
+            }
+        });
+
+        function addOrderToList(order) {
+            const ordersList = document.getElementById('orders');
+            const listItem = document.createElement('li');
+            listItem.textContent = `${order.quantity} x ${order.dish} - $${order.price.toFixed(2)} ${order.observations ? `(${order.observations})` : ''}`;
+            ordersList.appendChild(listItem);
+        }
+    </script>
+</body>
+</html>
